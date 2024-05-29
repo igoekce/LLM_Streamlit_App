@@ -1,14 +1,15 @@
 import os
 from dotenv import load_dotenv
 import streamlit as st
-from openai import OpenAI
+import openai
+import toml
 
-# Load environment variables from .env file
-load_dotenv()
+# Load secrets from secrets.toml
+secrets = toml.load("secrets.toml")
 
-# Set OpenAI API key from environment variable
-openai_api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=openai_api_key)
+# Set OpenAI API key from secrets file
+openai_api_key = secrets["general"]["OPENAI_API_KEY"]
+openai.api_key = openai_api_key
 
 st.title("OpenAI Chatbot")
 st.write("Ask me anything!")
@@ -25,9 +26,14 @@ if st.button("Send") and user_input:
     # Add user input to conversation history
     st.session_state.messages.append({"role": "user", "content": user_input})
 
+    # Instantiate the OpenAI client
+    client = openai.OpenAI(api_key=openai_api_key)
+
     # Get response from OpenAI
-    response = client.chat.completions.create(model="gpt-3.5-turbo",  # or "gpt-4" if available
-    messages=st.session_state.messages)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",  # or "gpt-4" if available
+        messages=st.session_state.messages
+    )
 
     # Extract the text from the response
     output = response.choices[0].message.content.strip()
