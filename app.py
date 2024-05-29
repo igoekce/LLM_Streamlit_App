@@ -4,12 +4,17 @@ import streamlit as st
 import openai
 import toml
 
-# Load secrets from secrets.toml
-secrets = toml.load("secrets.toml")
+# Check if we are running on Streamlit cloud or on a local machine
+if 'Streamlit' in os.environ:
+    # Running on Streamlit cloud
+    openai_api_key = st.secrets["OPENAI_API_KEY"]
+else:
+    # Running on a local machine
+    secrets = toml.load("secrets.toml")
+    openai_api_key = secrets["general"]["OPENAI_API_KEY"]
 
-# Set OpenAI API key from secrets file
-openai_api_key = secrets["general"]["OPENAI_API_KEY"]
 openai.api_key = openai_api_key
+
 
 st.title("OpenAI Chatbot")
 st.write("Ask me anything!")
